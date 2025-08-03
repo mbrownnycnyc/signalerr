@@ -43,18 +43,21 @@ Google Voice provides a free phone number that works perfectly with Signal regis
 
 ### Step 1: Create Google Voice Account
 
-1. **Visit Google Voice**:
+1. **create a google account**
+   - you can use a phone number attached to another google account to verify
+
+2. **Visit Google Voice**:
    - Go to [voice.google.com](https://voice.google.com)
    - Sign in with your Google account
 
-2. **Choose a Number**:
+3. **Choose a Number**:
    - Click "Get a Voice number"
    - Search by area code or city
    - Select an available number
    - Click "Select"
 
-3. **Verify Your Number**:
-   - Enter your existing phone number for verification
+4. **Verify Your Number**:
+   - Enter your existing phone number for verification (this can not be a google voice number, you can find an esim provider)
    - Choose SMS or call verification
    - Enter the verification code received
    - Complete the setup process

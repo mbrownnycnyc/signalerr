@@ -395,3 +395,76 @@ For issues and questions:
 - [Overseerr](https://github.com/sct/overseerr) - Media request management
 - [Flask](https://flask.palletsprojects.com/) - Web framework
 - [SQLAlchemy](https://www.sqlalchemy.org/) - Database ORM
+
+
+# Produced using DeepAgent by abacus.ai
+
+* this is really a test project for using DeepAgent.
+  * initial token cost, including questions and answers: ~2200.
+  * To complete the DeepAgent tasks, I had to upgrade to Pro ($20USD/month).  I used my Cashapp card, and funded it with $10 to sign up then $10 to move to Pro so the subscription will break if I don't get any traction on use.
+
+## prompt
+```
+My goal is to create a signal bot which runs on a docker container.  This signal bot will interface with overseerr via an API.
+
+The goal of the bot is to allow people to request tv shows and movies via overseerr.
+
+The name of the project is called signalerr
+
+If the movie or tv show is available, let the user know that "overseerr will begin communicating with sonarr or radarr to search now. An update will be given in no less than two minutes."  Then send the request to overseerr.  Allow two minutes to pass, then check with overseerr to obtain status of the download.  If the movie or tv show are downloading, then let the user know that their download has begun, listing the name of the movie or tv show, and the time remaining.  If the movie or tv show are not downloading, then let the user know "Unfortunately, it doesn't appear that sonarr or radarr have been able to locate your movie or tv show.  That doesn't mean it won't be found, as sonarr or radarr will keep searching for it to arrive.  This may happen if you've requested a movie that hasn't been released yet or if you're a hipster and have requested a movie or tv show that's obscure."
+
+Use the overseerr API to request the entire tv show, or the movie.
+
+If the movie is part of a series, prompt the user with a question such as "[Movie name] is part of a movie series called: [movie series name].  Would you like to request all movies in the series instead of just the movie?"  Then call the API to do just that.
+
+If the TV series is more than four seasons, prompt the user with "The TV show [tv show name] has more than four seasons.  Would you like to download only the latest four seasons?"  then call the API to do just that.
+
+As movies or tv shows are downloaded, provide a user with download status only when the user asks.
+
+Everything should be run within a docker container.  Overseerr is accessible with an API key and an http connection.  Each user's signal number or ID must be known by an admin and added via a simple administrative web UI.  The UI should provide the ability to enter any settings related to the signal client config, as well as issue any bot invites.  If it makes it easier to start a group conversation with the bot and the user, then that's fine (and preferred), but the only people in the signal group that can interact with the bot will be the ones onboarded through the admin UI.
+
+Include explicit configuration instructions, including a docker compose file to make it easy.  Also, provide exact step by step instructions on setting up a google voice account and signal number.
+
+Include all code files as a source.
+
+Ask as many questions as you need.
+```
+
+## questions and answers
+```
+1. Overseerr API Details: Do you have the Overseerr API documentation URL or specific endpoints you want me to reference? Or should I use the standard Overseerr API endpoints?
+2. Signal Bot Framework: Would you prefer to use a specific Signal bot library/framework (like signal-cli, or a Python library), or do you have a preference?
+3. Database: Do you need persistent storage for user management and request tracking? Should I include a simple database (like SQLite) in the Docker setup?
+4. Admin UI Features: Besides adding users and Signal config, what other admin features would you like? (e.g., view all requests, manage download queue, bot statistics)
+5. User Authentication: Should the bot verify users by their Signal phone number, or do you want additional authentication layers?
+6. Notification Preferences: Should the bot automatically notify users when their downloads complete, or only when they ask for status updates?
+7. Request Limits: Should there be any limits on how many requests a user can make per day/hour?
+
+1. Use the standard Overseerr API documentation.
+2. i have no specific preference, but I will be asking you to add features as the project grows, so whatever is easier. 
+3. yes, i'd like persistent tracking of user requests, maybe users will be able to look up their fulfillment and other activity stats.  Whatever you feel is appropriate is fine.  SQLite is fine.  It won't scale past 50 users.
+4. the admin UI MUST be served from the docker container itself, not on abacus.  No exceptions.  Bot statistics is fine.
+5. just by phone number, as added by the admin themselves.  The bot will reject anyone who isn't the added number.
+6. by default, alert the user when their download completes; but allow them to disable this.
+7. You can enable this as a feature that is configurable in the admin ui.
+
+If you have any more questions, please ask.
+
+
+1. Admin UI Port: What port should the admin web UI run on inside the container? (e.g., port 8080, 3000, etc.)
+2. Signal Bot Setup: Should the bot create a group chat with each user when they're added, or should users initiate contact with the bot directly? You mentioned preferring group conversations.
+3. Overseerr Connection: Should the Overseerr API URL and API key be configurable through the admin UI, or just through environment variables/config files?
+4. Download Status Format: For the download status messages, do you want specific details like file size, download speed, ETA, or just basic "downloading/completed" status?
+5. Movie Series Detection: Should I use a specific movie database API (like TMDB) to detect movie series, or rely on Overseerr's built-in series detection?
+6. Error Handling: How should the bot handle cases where Overseerr is unreachable or returns errors? Should it queue requests to retry later?
+7. Logging: Do you want detailed logging for debugging purposes, and should logs be accessible through the admin UI?
+
+1. the overseerr integration should be configuable through the admin ui.
+2. there is a requirement that the signal number be added to the admin ui.  a group conversation is fine, or direct messaging is also  fine.  If the user adds the signal bot number to a chat or group, then that's fine.  If a group doesn't exist, there should be a user issued command to have the bot create a group.
+3. yes, generally all variable items should be configurable through the admin ui.  Remember: the admin UI is not to be hosted on ababus, but to be hosted in the container.  No exceptions.
+4. By default provide verbose information about downloads.  However, provide verbosity levels as follows: verbose (contains all information about downloads), simple (provides the simply the name of items and their remaining time to download), casual (just providing whether or not the users requests are downloading with the strings "still downloadin'"  "done downloadin'"
+5. rely on built in overseerr.
+6. yes, share that there is an error, and state that the sysop has been contacted, then use signal to contact the admin with the error information.  The admin signal number should be configurable in the admin ui.  You may have many admins.
+7. yes, verbose logging if levels are selected,  yes, make available in web ui and in docker container.
+
+```
