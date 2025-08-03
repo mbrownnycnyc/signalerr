@@ -3,6 +3,11 @@
 
 Signalerr is a Signal bot that integrates with Overseerr to allow users to request movies and TV shows via Signal messages. It includes a web-based admin interface for user management, request monitoring, and configuration.
 
+> [!NOTE]
+> This project was produced by DeepAgent by abacus.ai!  I wanted to give it a shot, and thought this would be useful.
+> You can read more about my experience in [the last section](#produced-using-deepagent-by-abacus-ai)
+
+
 ## Features
 
 - **Signal Bot Integration**: Request media via Signal messages
@@ -397,11 +402,12 @@ For issues and questions:
 - [SQLAlchemy](https://www.sqlalchemy.org/) - Database ORM
 
 
-# Produced using DeepAgent by abacus.ai
+## Produced using DeepAgent by abacus.ai
 
 * this is really a test project for using DeepAgent.
   * initial token cost, including questions and answers: ~2200.
   * To complete the DeepAgent tasks, I had to upgrade to Pro ($20USD/month).  I used my Cashapp card, and funded it with $10 to sign up then $10 to move to Pro so the subscription will break if I don't get any traction on use.
+* The entire generation process took about 15 minutes.
 
 ## prompt
 ```
