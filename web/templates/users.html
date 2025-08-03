@@ -1,0 +1,183 @@
+
+{% extends "base.html" %}
+
+{% block title %}Users - Signalerr Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">User Management</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fas fa-user-plus"></i> Add User
+        </button>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card shadow">
+    <div class="card-body">
+        {% if users %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Phone Number</th>
+                            <th>Display Name</th>
+                            <th>Status</th>
+                            <th>Role</th>
+                            <th>Daily Limit</th>
+                            <th>Verbosity</th>
+                            <th>Last Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.phone_number }}</td>
+                            <td>{{ user.display_name or '-' }}</td>
+                            <td>
+                                <span class="badge bg-{% if user.is_active %}success{% else %}secondary{% endif %}">
+                                    {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if user.is_admin %}warning{% else %}info{% endif %}">
+                                    {% if user.is_admin %}Admin{% else %}User{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ user.get_daily_request_count() }}/{{ user.daily_request_limit }}</td>
+                            <td>{{ user.verbosity_level.value.title() }}</td>
+                            <td>{{ user.last_active.strftime('%m/%d %H:%M') if user.last_active else '-' }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editUser({{ user.id }}, '{{ user.phone_number }}', '{{ user.display_name or '' }}', {{ user.is_admin|lower }}, {{ user.is_active|lower }}, {{ user.daily_request_limit }}, '{{ user.verbosity_level.value }}', {{ user.auto_notifications|lower }})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                {% if not user.is_admin or users|selectattr('is_admin')|list|length > 1 %}
+                                <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to deactivate this user?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No users found</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_user') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="+1234567890" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="display_name" class="form-label">Display Name</label>
+                        <input type="text" class="form-control" id="display_name" name="display_name" placeholder="Optional display name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="daily_limit" class="form-label">Daily Request Limit</label>
+                        <input type="number" class="form-control" id="daily_limit" name="daily_limit" value="10" min="1" max="100">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin">
+                        <label class="form-check-label" for="is_admin">Admin User</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="editUserForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="edit_phone" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_display_name" class="form-label">Display Name</label>
+                        <input type="text" class="form-control" id="edit_display_name" name="display_name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_daily_limit" class="form-label">Daily Request Limit</label>
+                        <input type="number" class="form-control" id="edit_daily_limit" name="daily_limit" min="1" max="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_verbosity" class="form-label">Verbosity Level</label>
+                        <select class="form-select" id="edit_verbosity" name="verbosity">
+                            <option value="casual">Casual</option>
+                            <option value="simple">Simple</option>
+                            <option value="verbose">Verbose</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_is_admin" name="is_admin">
+                        <label class="form-check-label" for="edit_is_admin">Admin User</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_is_active" name="is_active">
+                        <label class="form-check-label" for="edit_is_active">Active User</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_auto_notifications" name="auto_notifications">
+                        <label class="form-check-label" for="edit_auto_notifications">Auto Notifications</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function editUser(id, phone, displayName, isAdmin, isActive, dailyLimit, verbosity, autoNotifications) {
+    document.getElementById('edit_phone').value = phone;
+    document.getElementById('edit_display_name').value = displayName;
+    document.getElementById('edit_daily_limit').value = dailyLimit;
+    document.getElementById('edit_verbosity').value = verbosity;
+    document.getElementById('edit_is_admin').checked = isAdmin;
+    document.getElementById('edit_is_active').checked = isActive;
+    document.getElementById('edit_auto_notifications').checked = autoNotifications;
+    
+    document.getElementById('editUserForm').action = `/users/${id}/edit`;
+    
+    new bootstrap.Modal(document.getElementById('editUserModal')).show();
+}
+</script>
+{% endblock %}

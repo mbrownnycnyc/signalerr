@@ -1,0 +1,85 @@
+
+version: '3.8'
+
+services:
+  signalerr:
+    build: .
+    container_name: signalerr
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - signal_config:/home/signal/.local/share/signal-cli
+    environment:
+      # Overseerr Configuration
+      - OVERSEERR_URL=${OVERSEERR_URL:-http://localhost:5055}
+      - OVERSEERR_API_KEY=${OVERSEERR_API_KEY}
+      
+      # Signal Configuration
+      - SIGNAL_CLI_PATH=/usr/local/bin/signal-cli
+      - SIGNAL_PHONE_NUMBER=${SIGNAL_PHONE_NUMBER}
+      - SIGNAL_CLI_CONFIG_DIR=/home/signal/.local/share/signal-cli
+      
+      # Database Configuration
+      - DATABASE_URL=sqlite:///app/data/signalerr.db
+      
+      # Web UI Configuration
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY:-change-this-secret-key}
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=8080
+      - FLASK_DEBUG=false
+      
+      # Admin Configuration
+      - ADMIN_PHONE_NUMBERS=${ADMIN_PHONE_NUMBERS}
+      
+      # Bot Configuration
+      - REQUEST_TIMEOUT_MINUTES=${REQUEST_TIMEOUT_MINUTES:-2}
+      - MAX_REQUESTS_PER_USER_PER_DAY=${MAX_REQUESTS_PER_USER_PER_DAY:-10}
+      - DEFAULT_VERBOSITY=${DEFAULT_VERBOSITY:-simple}
+      - ENABLE_GROUP_CHATS=${ENABLE_GROUP_CHATS:-true}
+      - ENABLE_AUTO_NOTIFICATIONS=${ENABLE_AUTO_NOTIFICATIONS:-true}
+      
+      # Logging Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FILE=/app/logs/signalerr.log
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    depends_on:
+      - overseerr
+    
+    networks:
+      - signalerr-network
+
+  # Optional: Include Overseerr service for complete setup
+  overseerr:
+    image: sctx/overseerr:latest
+    container_name: overseerr
+    restart: unless-stopped
+    ports:
+      - "5055:5055"
+    volumes:
+      - overseerr_config:/app/config
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ:-UTC}
+    
+    networks:
+      - signalerr-network
+
+volumes:
+  signal_config:
+    driver: local
+  overseerr_config:
+    driver: local
+
+networks:
+  signalerr-network:
+    driver: bridge

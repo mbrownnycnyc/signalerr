@@ -1,0 +1,21 @@
+
+{% extends "base.html" %}
+
+{% block title %}Error - Signalerr Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="text-center">
+                <div class="error mx-auto" data-text="404">
+                    <p class="m-0">❌</p>
+                </div>
+                <p class="text-dark mb-5 lead">{{ error }}</p>
+                <p class="text-gray-500 mb-0">It looks like something went wrong</p>
+                <a href="{{ url_for('dashboard') }}">&larr; Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

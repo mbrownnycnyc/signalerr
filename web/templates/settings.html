@@ -1,0 +1,208 @@
+
+{% extends "base.html" %}
+
+{% block title %}Settings - Signalerr Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Bot Settings</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-success" onclick="testOverseerr()">
+            <i class="fas fa-plug"></i> Test Overseerr Connection
+        </button>
+    </div>
+</div>
+
+<form method="POST" action="{{ url_for('update_settings') }}">
+    <div class="row">
+        <!-- Overseerr Settings -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Overseerr Configuration</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="overseerr_url" class="form-label">Overseerr URL</label>
+                        <input type="url" class="form-control" id="overseerr_url" name="setting_overseerr_url" 
+                               value="{{ settings.get('overseerr_url').value if settings.get('overseerr_url') else '' }}" 
+                               placeholder="http://localhost:5055" required>
+                        <div class="form-text">Full URL to your Overseerr instance</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="overseerr_api_key" class="form-label">API Key</label>
+                        <input type="password" class="form-control" id="overseerr_api_key" name="setting_overseerr_api_key" 
+                               value="{{ settings.get('overseerr_api_key').value if settings.get('overseerr_api_key') else '' }}" 
+                               placeholder="Your Overseerr API key" required>
+                        <div class="form-text">Generate this in Overseerr Settings > General</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bot Settings -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Bot Configuration</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="request_timeout_minutes" class="form-label">Request Timeout (minutes)</label>
+                        <input type="number" class="form-control" id="request_timeout_minutes" name="setting_request_timeout_minutes" 
+                               value="{{ settings.get('request_timeout_minutes').value if settings.get('request_timeout_minutes') else '2' }}" 
+                               min="1" max="60">
+                        <div class="form-text">How long to wait before checking request status</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="max_requests_per_user_per_day" class="form-label">Default Daily Request Limit</label>
+                        <input type="number" class="form-control" id="max_requests_per_user_per_day" name="setting_max_requests_per_user_per_day" 
+                               value="{{ settings.get('max_requests_per_user_per_day').value if settings.get('max_requests_per_user_per_day') else '10' }}" 
+                               min="1" max="100">
+                        <div class="form-text">Default daily request limit for new users</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="default_verbosity" class="form-label">Default Verbosity Level</label>
+                        <select class="form-select" id="default_verbosity" name="setting_default_verbosity">
+                            <option value="casual" {% if settings.get('default_verbosity') and settings.get('default_verbosity').value == 'casual' %}selected{% endif %}>Casual</option>
+                            <option value="simple" {% if settings.get('default_verbosity') and settings.get('default_verbosity').value == 'simple' %}selected{% endif %}>Simple</option>
+                            <option value="verbose" {% if settings.get('default_verbosity') and settings.get('default_verbosity').value == 'verbose' %}selected{% endif %}>Verbose</option>
+                        </select>
+                        <div class="form-text">Default notification style for new users</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Admin Settings -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Admin Configuration</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="admin_phone_numbers" class="form-label">Admin Phone Numbers</label>
+                        <textarea class="form-control" id="admin_phone_numbers" name="setting_admin_phone_numbers" rows="3" 
+                                  placeholder="+1234567890,+0987654321">{{ settings.get('admin_phone_numbers').value if settings.get('admin_phone_numbers') else '' }}</textarea>
+                        <div class="form-text">Comma-separated list of admin phone numbers</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Toggles -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Feature Settings</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="bot_enabled" name="setting_bot_enabled" value="true"
+                               {% if settings.get('bot_enabled') and settings.get('bot_enabled').value == 'true' %}checked{% endif %}>
+                        <label class="form-check-label" for="bot_enabled">Bot Enabled</label>
+                        <div class="form-text">Enable/disable the entire bot</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="enable_group_chats" name="setting_enable_group_chats" value="true"
+                               {% if settings.get('enable_group_chats') and settings.get('enable_group_chats').value == 'true' %}checked{% endif %}>
+                        <label class="form-check-label" for="enable_group_chats">Enable Group Chats</label>
+                        <div class="form-text">Allow bot to work in group chats</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="enable_auto_notifications" name="setting_enable_auto_notifications" value="true"
+                               {% if settings.get('enable_auto_notifications') and settings.get('enable_auto_notifications').value == 'true' %}checked{% endif %}>
+                        <label class="form-check-label" for="enable_auto_notifications">Enable Auto Notifications</label>
+                        <div class="form-text">Send automatic download completion notifications</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="maintenance_mode" name="setting_maintenance_mode" value="true"
+                               {% if settings.get('maintenance_mode') and settings.get('maintenance_mode').value == 'true' %}checked{% endif %}>
+                        <label class="form-check-label" for="maintenance_mode">Maintenance Mode</label>
+                        <div class="form-text">Disable bot for non-admin users</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function testOverseerr() {
+    const url = document.getElementById('overseerr_url').value;
+    const apiKey = document.getElementById('overseerr_api_key').value;
+    
+    if (!url || !apiKey) {
+        alert('Please enter both Overseerr URL and API key');
+        return;
+    }
+    
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+    button.disabled = true;
+    
+    fetch('/api/test_overseerr', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            url: url,
+            api_key: apiKey
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Connection successful!');
+        } else {
+            alert('❌ Connection failed: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('❌ Error testing connection: ' + error);
+    })
+    .finally(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+// Handle checkbox values for form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][name^="setting_"]');
+    checkboxes.forEach(checkbox => {
+        // Add hidden input for unchecked state
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = checkbox.name;
+        hiddenInput.value = 'false';
+        checkbox.parentNode.insertBefore(hiddenInput, checkbox);
+        
+        // Update hidden input when checkbox changes
+        checkbox.addEventListener('change', function() {
+            hiddenInput.disabled = this.checked;
+        });
+        
+        // Set initial state
+        hiddenInput.disabled = checkbox.checked;
+    });
+});
+</script>
+{% endblock %}
