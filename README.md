@@ -408,6 +408,7 @@ For issues and questions:
   * initial token cost, including questions and answers: ~2200.
   * To complete the DeepAgent tasks, I had to upgrade to Pro ($20USD/month).  I used my Cashapp card, and funded it with $10 to sign up then $10 to move to Pro so the subscription will break if I don't get any traction on use.
 * The entire generation process took about 15 minutes.
+* In my mind, the idea is to get 80%+ of the way to a finished production product.  Therefore, the cost is justified as it would be if I had raised a custom coding request on a site.  I'm happy to have a deep conversation with DeepAgent before it begins, effectively "Can I get this icon in cornflower blue"-ing my way through a request.
 
 ## prompt
 ```
